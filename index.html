@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>产品成本核算 · Excel 对照</title>
+  <style>
+    :root {
+      --primary:#1e40af; --bg:#f1f5f9; --card:#fff; --text:#0f172a;
+      --muted:#64748b; --border:#e2e8f0; --excel:#cfe8f5; --pink:#f4c7c3;
+      --yellow:#fff2a8; --radius:14px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+      background:var(--bg); color:var(--text); line-height:1.5;
+      padding:12px; padding-bottom:108px;
+    }
+    .wrap { max-width:1100px; margin:0 auto; }
+    h1 { font-size:1.3rem; color:var(--primary); text-align:center; }
+    .sub { text-align:center; color:var(--muted); font-size:.82rem; margin:4px 0 12px; }
+    .quote-top {
+      display:grid; grid-template-columns:1fr 1fr; gap:8px;
+      background:linear-gradient(135deg,#1e40af,#0f766e); color:#fff;
+      border-radius:var(--radius); padding:12px; margin-bottom:10px;
+    }
+    .q { background:rgba(255,255,255,.12); border-radius:10px; padding:8px 10px; }
+    .q.usd { background:rgba(250,204,21,.18); }
+    .q .lbl { font-size:.72rem; opacity:.9; }
+    .q .big { font-size:1.45rem; font-weight:800; }
+    .status {
+      font-size:.8rem; font-weight:700; padding:8px 10px; border-radius:10px;
+      margin-bottom:12px; background:#ecfdf5; color:#047857; border:1px solid #a7f3d0;
+    }
+    .card {
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:0 4px 12px rgba(0,0,0,.06); padding:16px; margin-bottom:14px;
+    }
+    h2 { font-size:1.02rem; color:var(--primary); margin-bottom:8px; }
+    h3 { font-size:.88rem; color:#1e3a8a; margin:8px 0; }
+    label { display:block; font-size:.78rem; font-weight:600; color:#475569; margin-bottom:4px; }
+    input, textarea {
+      width:100%; padding:9px 10px; border:1px solid var(--border);
+      border-radius:8px; font-size:16px; background:#fff;
+    }
+    textarea { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; min-height:38px; }
+    .cyan { background:var(--excel) !important; }
+    .yellow { background:var(--yellow) !important; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .col { flex:1; min-width:84px; }
+    .hint { font-size:.75rem; color:var(--muted); background:#f8fafc; padding:8px 10px; border-radius:8px; margin:6px 0 10px; }
+    .mini { font-size:.8rem; font-weight:700; text-align:center; padding:7px; border-radius:8px; margin-top:6px; background:#eff6ff; color:#1d4ed8; }
+    table { width:100%; border-collapse:collapse; font-size:.85rem; }
+    th, td { padding:7px 4px; border-bottom:1px solid var(--border); text-align:left; }
+    th { background:var(--pink); font-size:.76rem; }
+    td input { padding:6px 8px; font-size:14px; }
+    .amt { font-variant-numeric:tabular-nums; font-weight:700; }
+    .btn { background:var(--primary); color:#fff; border:none; padding:8px 12px; border-radius:8px; cursor:pointer; font-size:.86rem; }
+    .btn-sm { padding:6px 10px; font-size:.78rem; }
+    .btn-ghost { background:#f1f5f9; color:#334155; border:1px solid var(--border); }
+    .btn-outline { background:#fff; color:var(--primary); border:1px solid var(--primary); }
+    .btn-danger { background:#dc2626; color:#fff; }
+    .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .grid { display:grid; gap:16px; }
+    @media (min-width:860px) { .grid-2 { grid-template-columns:1.15fr .85fr; } }
+    details { background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius); padding:4px 14px 12px; margin-bottom:14px; }
+    details.test { background:#f8fafc; border-color:#cbd5e1; }
+    summary { cursor:pointer; font-weight:700; color:var(--primary); padding:10px 0; }
+    .tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; }
+    .tab { border:1px solid var(--border); background:#fff; padding:5px 10px; border-radius:999px; cursor:pointer; font-size:.8rem; }
+    .tab.on { background:var(--primary); color:#fff; }
+    .pane { display:none; } .pane.on { display:block; }
+    .quote {
+      background:linear-gradient(135deg,#1e40af,#0f766e); color:#fff;
+      padding:18px; border-radius:var(--radius); text-align:center;
+    }
+    .steps { font-size:.86rem; margin-top:10px; text-align:left; }
+    .steps div { display:flex; justify-content:space-between; padding:2px 0; gap:8px; }
+    .pass { color:#047857; font-weight:700; }
+    .fail { color:#b91c1c; font-weight:700; }
+    .cat td { background:#e2e8f0; font-weight:700; font-family:inherit !important; }
+    .test td { font-size:.74rem; font-family:ui-monospace,Menlo,Consolas,monospace; }
+    .sticky {
+      position:fixed; left:0; right:0; bottom:0;
+      background:rgba(15,23,42,.94); color:#fff;
+      padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+      display:flex; justify-content:space-between; gap:8px; font-size:.88rem;
+    }
+    .g { color:#86efac; font-weight:800; }
+    .y { color:#fde047; font-weight:800; }
+    @keyframes flash { from { filter:brightness(1.4);} to { filter:brightness(1);} }
+    .flash { animation:flash .4s ease; }
+    @media (max-width:640px) {
+      .col { min-width:100%; }
+      .q .big { font-size:1.2rem; }
+      table { display:block; overflow-x:auto; }
+    }
+    @media print { .sticky,.btn,details,.quote-top,.status { display:none !important; } }
+  </style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <h1>产品成本核算</h1>
+  <div class="sub">瓶尺寸 / 保利龙 / 内盒外箱默认留空 · 填完即出人民币 / 美金</div>
+
+  <div class="quote-top" id="topQuote">
+    <div class="q"><div class="lbl">人民币</div><div class="big" id="topRmb">¥ 0.00</div></div>
+    <div class="q usd"><div class="lbl">美金</div><div class="big" id="topUsd">$ 0.000000000</div></div>
+  </div>
+  <div class="status" id="status">空白表：吊牌 0.25 + 内盒 0.008 + 外箱 0.004 = 0.262，报价约 ¥0.35</div>
+
+  <details class="test" id="testBox">
+    <summary>全公式单元测试 <span id="testSum"></span></summary>
+    <p class="hint">打开为空白尺寸。截图 10×10×12 + 25³ 在测试里单独验算，不是初始值。</p>
+    <button class="btn btn-sm" type="button" onclick="runTests(true)">重新测试</button>
+    <div style="overflow:auto;max-height:320px;margin-top:8px;">
+      <table class="test">
+        <thead><tr><th>用例</th><th>期望</th><th>实际</th><th></th></tr></thead>
+        <tbody id="testBody"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <details>
+    <summary>公式车间</summary>
+    <div class="tabs" id="tabs">
+      <button class="tab on" type="button" data-p="const">常数</button>
+      <button class="tab" type="button" data-p="tpl">模板</button>
+      <button class="tab" type="button" data-p="mk">加价</button>
+    </div>
+    <div id="p-const" class="pane on">
+      <div class="row">
+        <div class="col"><label>in2cm</label><input id="c_in2cm" type="number" step="any"></div>
+        <div class="col"><label>foamDiv</label><input id="c_foamDiv" type="number" step="any"></div>
+        <div class="col"><label>clothDiv</label><input id="c_clothDiv" type="number" step="any"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>volDiv</label><input id="c_volDiv" type="number" step="any"></div>
+        <div class="col"><label>kg2lbs</label><input id="c_kg2lbs" type="number" step="any"></div>
+        <div class="col"><label>potCoef</label><input id="c_potCoef" type="number" step="any"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>cartonDiv</label><input id="c_cartonDiv" type="number" step="any"></div>
+        <div class="col"><label>默认汇率（空值回退）</label><input id="c_fxRate" type="number" step="any"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>rmbExpr</label><input id="c_finalExpr" data-f="1"></div>
+        <div class="col"><label>usdExpr</label><input id="c_usdExpr" data-f="1"></div>
+      </div>
+    </div>
+    <div id="p-tpl" class="pane">
+      <textarea id="f_potExpr" data-f="1"></textarea>
+      <textarea id="f_foamExpr" data-f="1"></textarea>
+      <textarea id="f_clothExpr" data-f="1"></textarea>
+      <textarea id="f_volExpr" data-f="1"></textarea>
+      <textarea id="f_weightExpr" data-f="1"></textarea>
+      <textarea id="f_cartonExpr" data-f="1"></textarea>
+      <textarea id="f_matExpr" data-f="1"></textarea>
+    </div>
+    <div id="p-mk" class="pane">
+      <div id="mkList"></div>
+      <div class="toolbar">
+        <button class="btn btn-outline btn-sm" type="button" onclick="addMk()">+ 步骤</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="resetMk()">恢复 Excel 加价</button>
+      </div>
+    </div>
+  </details>
+
+  <div class="card">
+    <h2>① 瓶尺寸（默认空）</h2>
+    <div class="grid grid-2">
+      <div>
+        <strong>瓶尺寸</strong>
+        <div class="row">
+          <div class="col"><label>长 CM</label><input class="cyan" id="botL_cm" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽 CM</label><input class="cyan" id="botW_cm" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高 CM</label><input class="cyan" id="botH_cm" type="number" step="any" placeholder="空"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>长 in</label><input id="botL_in" readonly></div>
+          <div class="col"><label>宽 in</label><input id="botW_in" readonly></div>
+          <div class="col"><label>高 in</label><input id="botH_in" readonly></div>
+        </div>
+      </div>
+      <div>
+        <strong>产品尺寸</strong>
+        <div class="row">
+          <div class="col"><label>长 CM</label><input id="prodL_cm" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽 CM</label><input id="prodW_cm" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高 CM</label><input id="prodH_cm" type="number" step="any" placeholder="空"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>长 in</label><input id="prodL_in" readonly></div>
+          <div class="col"><label>宽 in</label><input id="prodW_in" readonly></div>
+          <div class="col"><label>高 in</label><input id="prodH_in" readonly></div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col"><label>净重 kg</label><input id="netKg" type="number" step="any" placeholder="空"></div>
+      <div class="col"><label>净重 LBS</label><input id="netLbs" readonly></div>
+    </div>
+    <label style="font-weight:500;"><input type="checkbox" id="syncFoam" style="width:auto;display:inline;"> 瓶尺寸写入保利龙内</label>
+    <label style="font-weight:500;"><input type="checkbox" id="syncFoamOut" style="width:auto;display:inline;"> 产品尺寸写入保利龙外</label>
+    <div class="mini" id="potHint">盆子</div>
+  </div>
+
+  <div class="card">
+    <h2>② 保利龙 / 内盒 / 外箱（默认空）</h2>
+    <div class="row">
+      <div class="col"><label>内盒装量（0 当 1）</label><input class="yellow" id="pcsPerInner" type="number" placeholder="空"></div>
+      <div class="col"><label>外箱装量</label><input class="yellow" id="innerPerOuter" type="number"></div>
+    </div>
+    <div class="grid grid-2">
+      <div>
+        <h3>内盒 CM</h3>
+        <div class="row">
+          <div class="col"><label>长</label><input class="yellow" id="innerL" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽</label><input class="yellow" id="innerW" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高</label><input class="yellow" id="innerH" type="number" step="any" placeholder="空"></div>
+        </div>
+        <div class="mini" id="boxInAmt">内盒</div>
+        <h3>外箱 CM</h3>
+        <div class="row">
+          <div class="col"><label>长</label><input class="yellow" id="outerL" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽</label><input class="yellow" id="outerW" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高</label><input class="yellow" id="outerH" type="number" step="any" placeholder="空"></div>
+        </div>
+        <div class="mini" id="boxOutAmt">外箱</div>
+        <div class="mini" id="volAmt">材积</div>
+      </div>
+      <div>
+        <h3>保利龙内（按件）</h3>
+        <div class="row">
+          <div class="col"><label>长</label><input class="yellow" id="foamInL" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽</label><input class="yellow" id="foamInW" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高</label><input class="yellow" id="foamInH" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>单价</label><input id="foamInP" type="number" step="any"></div>
+        </div>
+        <div class="mini" id="foamInAmt">保利龙内</div>
+        <h3>保利龙外（按箱再÷装量）</h3>
+        <div class="row">
+          <div class="col"><label>长</label><input class="yellow" id="foamOutL" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>宽</label><input class="yellow" id="foamOutW" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>高</label><input class="yellow" id="foamOutH" type="number" step="any" placeholder="空"></div>
+          <div class="col"><label>单价</label><input id="foamOutP" type="number" step="any"></div>
+        </div>
+        <div class="mini" id="foamOutAmt">保利龙外</div>
+        <h3>纸箱参数</h3>
+        <div class="row">
+          <div class="col"><label>内 addL</label><input id="boxInAddL" type="number" step="any"></div>
+          <div class="col"><label>addW</label><input id="boxInAddW" type="number" step="any"></div>
+          <div class="col"><label>面</label><input id="boxInSides" type="number" step="any"></div>
+          <div class="col"><label>单价</label><input id="boxInPrice" type="number" step="any"></div>
+        </div>
+        <div class="row">
+          <div class="col"><label>外 addL</label><input id="boxOutAddL" type="number" step="any"></div>
+          <div class="col"><label>addW</label><input id="boxOutAddW" type="number" step="any"></div>
+          <div class="col"><label>面</label><input id="boxOutSides" type="number" step="any"></div>
+          <div class="col"><label>单价</label><input id="boxOutPrice" type="number" step="any"></div>
+        </div>
+        <h3>用布（默认不进成本）</h3>
+        <div class="row">
+          <div class="col"><label>布长CM</label><input class="yellow" id="clothL" type="number" step="any"></div>
+          <div class="col"><label>宽CM</label><input class="yellow" id="clothW" type="number" step="any"></div>
+          <div class="col"><label>片</label><input id="clothPcs" type="number" step="any"></div>
+          <div class="col"><label>单价/Y</label><input id="clothPrice" type="number" step="any"></div>
+        </div>
+        <label style="font-weight:500;"><input type="checkbox" id="clothInCost" style="width:auto;display:inline;"> 把用布计入成本</label>
+        <div class="mini" id="clothAmt">用布</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>③ 材料明细（仅 Excel 11 项；新增名称留空）</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead><tr><th>名称</th><th>用量</th><th>单价</th><th>公式</th><th>金额</th><th></th></tr></thead>
+        <tbody id="matBody"></tbody>
+      </table>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-outline btn-sm" type="button" onclick="addRow()">+ 材料</button>
+      <button class="btn btn-ghost btn-sm" type="button" onclick="resetAll()">恢复空白表</button>
+    </div>
+    <div class="mini" id="matTotal">成本合计 0</div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>④ 加价 / 汇率</h2>
+      <div class="row">
+        <div class="col"><label>拖柜+报关/不含FOB %</label><input id="rateFOB" type="number" step="any"></div>
+        <div class="col"><label>管理+厂租 %</label><input id="rateMgmt" type="number" step="any"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>利润 %</label><input id="rateProfit" type="number" step="any"></div>
+        <div class="col"><label>汇率　1 USD = ? CNY</label><input id="fxRate" type="number" step="any"></div>
+      </div>
+      <div class="row"><div class="col"><label>其它固定</label><input id="otherFee" type="number" step="any" placeholder="空"></div></div>
+      <div class="mini" id="fxHint">美金 = 精确人民币 ÷ 汇率</div>
+    </div>
+    <div class="quote">
+      <div>最终报价 / 件</div>
+      <div class="quote-top" style="margin:8px 0 0;">
+        <div class="q"><div class="lbl">人民币</div><div class="big" id="finalRmb">¥ 0.00</div><div id="rmbExact" style="opacity:.85;font-size:.78rem;"></div></div>
+        <div class="q usd"><div class="lbl">美金</div><div class="big" id="finalUsd">$ 0.000000000</div><div id="usdExact" style="opacity:.85;font-size:.78rem;"></div></div>
+      </div>
+      <div class="steps" id="steps"></div>
+      <div class="toolbar" style="justify-content:center;">
+        <button class="btn" type="button" style="background:#fff;color:#1e40af;" onclick="print()">打印</button>
+        <button class="btn" type="button" style="background:#065f46;" onclick="save()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="sticky">
+  <span>成本 <b id="barCost">0</b></span>
+  <span>回车 = 下一项并出报价</span>
+  <span><span class="g" id="barRmb">¥ 0.00</span> | <span class="y" id="barUsd">$ 0.000000000</span></span>
+</div>
+<script>
+const F0 = {
+  in2cm:2.54, foamDiv:648000, clothDiv:2160, volDiv:1000000,
+  kg2lbs:2.20462, potCoef:0.0035, cartonDiv:1000, fxRate:6.8,
+  potExpr:'botL_cm * botW_cm * botH_cm * potCoef',
+  foamExpr:'L * W * H / foamDiv * price * qty',
+  clothExpr:'(L / in2cm) * (W / in2cm) / clothDiv * qty * price',
+  volExpr:'L * W * H / volDiv',
+  weightExpr:'netKg * kg2lbs',
+  cartonExpr:'(L / in2cm + W / in2cm + addL) * (W / in2cm + H / in2cm + addW) * sides / cartonDiv * price',
+  matExpr:'qty * price',
+  finalExpr:'matSum + other + feeSum',
+  usdExpr:'rmb / fxRate'
+};
+const MK0 = [
+  { name:'拖柜+报关/不含FOB', expr:'matSum * rateFOB / 100' },
+  { name:'管理+厂租', expr:'matSum * rateMgmt / 100' },
+  { name:'利润', expr:'(matSum + s0 + s1 + other) * rateProfit / 100' }
+];
+const MAT0 = [
+  { name:'组装', qty:1, price:'', formula:'qty * price' },
+  { name:'包装', qty:1, price:'', formula:'qty * price' },
+  { name:'盆子', qty:1, price:'', formula:'', link:'pot' },
+  { name:'石头胶水', qty:'', price:1, formula:'qty * price' },
+  { name:'吊牌', qty:1, price:0.25, formula:'qty * price' },
+  { name:'平卡', qty:'', price:0.15, formula:'qty * price' },
+  { name:'防撞纸卡', qty:'', price:0.3, formula:'qty * price' },
+  { name:'保利龙内', qty:1, price:'', formula:'', link:'foamIn' },
+  { name:'保利龙外', qty:1, price:'', formula:'', link:'foamOut' },
+  { name:'内盒', qty:1, price:'', formula:'', link:'boxIn' },
+  { name:'外箱', qty:1, price:'', formula:'', link:'boxOut' }
+];
+const IN0 = {
+  botL_cm:'', botW_cm:'', botH_cm:'',
+  prodL_cm:'', prodW_cm:'', prodH_cm:'', netKg:'',
+  foamInL:'', foamInW:'', foamInH:'', foamInP:90,
+  foamOutL:'', foamOutW:'', foamOutH:'', foamOutP:120,
+  innerL:'', innerW:'', innerH:'', pcsPerInner:'',
+  outerL:'', outerW:'', outerH:'', innerPerOuter:2,
+  clothL:10, clothW:7.5, clothPcs:1, clothPrice:4.5,
+  boxInAddL:2, boxInAddW:1, boxInSides:2, boxInPrice:2,
+  boxOutAddL:2, boxOutAddW:1, boxOutSides:2, boxOutPrice:2,
+  rateFOB:5, rateMgmt:10, rateProfit:15, fxRate:6.8, otherFee:''
+};
+const SHOT = {
+  botL_cm:10, botW_cm:10, botH_cm:12,
+  foamInL:25, foamInW:25, foamInH:25, foamInP:90,
+  foamOutL:25, foamOutW:25, foamOutH:25, foamOutP:120,
+  innerL:25, innerW:25, innerH:25,
+  outerL:25, outerW:25, outerH:25, innerPerOuter:2
+};
+const FL0 = { syncFoam:false, syncFoamOut:false, clothInCost:false };
+const AUTO_PRICE = ['pot','foamIn','foamOut','boxIn','boxOut'];
+
+let formulas = Object.assign({}, F0);
+let markup = JSON.parse(JSON.stringify(MK0));
+let mats = JSON.parse(JSON.stringify(MAT0));
+let timer = null, lastR = null, lastU = null;
+
+function num(v) {
+  if (v==null || v==='' || v==='-' || v==='.' || v==='-.') return 0;
+  const n = parseFloat(String(v).replace(/,/g,''));
+  return Number.isFinite(n) ? n : 0;
+}
+function liveRate(raw, fallback) {
+  const n = num(raw);
+  return n > 0 ? n : (fallback > 0 ? fallback : 6.8);
+}
+function ev(expr, vars) {
+  if (!expr || !String(expr).trim()) return 0;
+  try {
+    const ks = Object.keys(vars);
+    const fn = new Function(...ks, 'Math', '"use strict"; return ('+String(expr).trim()+');');
+    const x = fn(...ks.map(k=>vars[k]), Math);
+    return (typeof x==='number' && Number.isFinite(x)) ? x : 0;
+  } catch(e) { return 0; }
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+function clone(x){ return JSON.parse(JSON.stringify(x)); }
+function packIn(I){ const n = num(I.pcsPerInner); return n > 0 ? n : 1; }
+function packOut(I){ const n = num(I.innerPerOuter); return n > 0 ? n : 1; }
+function linkOf(m) {
+  if (m.link) return m.link;
+  const n = m.name || '';
+  if (n==='盆子') return 'pot';
+  if (n==='保利龙内') return 'foamIn';
+  if (n==='保利龙外') return 'foamOut';
+  if (n==='内盒') return 'boxIn';
+  if (n==='外箱') return 'boxOut';
+  if (n.indexOf('布')>=0) return 'cloth';
+  return '';
+}
+function fixMats(list) {
+  const src = Array.isArray(list) ? clone(list) : clone(MAT0);
+  src.forEach(m => { m.link = linkOf(m); });
+  return src;
+}
+function g(id){ const el=document.getElementById(id); return el ? el.value : ''; }
+function gi(id){ return num(g(id)); }
+function setv(id,v){ const el=document.getElementById(id); if(el) el.value = v==null?'':v; }
+function blank() {
+  return { formulas:Object.assign({},F0), markup:clone(MK0), mats:clone(MAT0), inputs:Object.assign({},IN0), flags:Object.assign({},FL0) };
+}
+function shot() {
+  const s = blank();
+  Object.assign(s.inputs, SHOT);
+  return s;
+}
+function uiState() {
+  readF();
+  const inputs = {};
+  Object.keys(IN0).forEach(id => inputs[id] = g(id));
+  return {
+    formulas:Object.assign({},formulas), markup:clone(markup), mats:fixMats(mats),
+    inputs, flags:{ syncFoam:syncFoam.checked, syncFoamOut:syncFoamOut.checked, clothInCost:clothInCost.checked }
+  };
+}
+function cartonVars(v, I, L,W,H, addL,addW,sides,price) {
+  return Object.assign({}, v, {
+    L:num(I[L]), W:num(I[W]), H:num(I[H]),
+    addL:num(I[addL]), addW:num(I[addW]), sides:num(I[sides]), price:num(I[price]), qty:1
+  });
+}
+function compute(st) {
+  const F = Object.assign({}, F0, st.formulas||{});
+  if (!String(F.cartonExpr||'').includes('in2cm')) F.cartonExpr = F0.cartonExpr;
+  const I = Object.assign({}, IN0, st.inputs||{});
+  const fl = Object.assign({}, FL0, st.flags||{});
+  const mk = (st.markup&&st.markup.length)?st.markup:MK0;
+  const material = fixMats(st.mats);
+  if (fl.syncFoam) { I.foamInL=I.botL_cm; I.foamInW=I.botW_cm; I.foamInH=I.botH_cm; }
+  if (fl.syncFoamOut) { I.foamOutL=I.prodL_cm; I.foamOutW=I.prodW_cm; I.foamOutH=I.prodH_cm; }
+  const fx = liveRate(I.fxRate, F.fxRate);
+  const v = {
+    in2cm:F.in2cm, foamDiv:F.foamDiv, clothDiv:F.clothDiv, volDiv:F.volDiv,
+    kg2lbs:F.kg2lbs, potCoef:F.potCoef, cartonDiv:F.cartonDiv, fxRate: fx,
+    rateFOB:num(I.rateFOB), rateMgmt:num(I.rateMgmt), rateProfit:num(I.rateProfit),
+    other:num(I.otherFee), netKg:num(I.netKg),
+    botL_cm:num(I.botL_cm), botW_cm:num(I.botW_cm), botH_cm:num(I.botH_cm),
+    prodL_cm:num(I.prodL_cm), prodW_cm:num(I.prodW_cm), prodH_cm:num(I.prodH_cm)
+  };
+  const toIn = cm => cm / (F.in2cm||2.54);
+  const pcsIn = packIn(I), pcsBox = packOut(I);
+  const pot = ev(F.potExpr, v);
+  const foamIn = ev(F.foamExpr, Object.assign({},v,{L:num(I.foamInL),W:num(I.foamInW),H:num(I.foamInH),price:num(I.foamInP),qty:1}));
+  const foamOutBox = ev(F.foamExpr, Object.assign({},v,{L:num(I.foamOutL),W:num(I.foamOutW),H:num(I.foamOutH),price:num(I.foamOutP),qty:1}));
+  const foamOutPc = foamOutBox / pcsBox;
+  const cloth = ev(F.clothExpr, Object.assign({},v,{L:num(I.clothL),W:num(I.clothW),H:0,qty:num(I.clothPcs),price:num(I.clothPrice)}));
+  const yards = toIn(num(I.clothL))*toIn(num(I.clothW))/F.clothDiv*num(I.clothPcs);
+  const lbs = ev(F.weightExpr, v);
+  const innerCBM = ev(F.volExpr, Object.assign({},v,{L:num(I.innerL),W:num(I.innerW),H:num(I.innerH)}));
+  const outerCBM = ev(F.volExpr, Object.assign({},v,{L:num(I.outerL),W:num(I.outerW),H:num(I.outerH)}));
+  const packVol = (num(I.pcsPerInner)||0) * (num(I.innerPerOuter)||0);
+  const perCBM = packVol ? outerCBM/packVol : 0;
+  const boxInBox = ev(F.cartonExpr, cartonVars(v,I,'innerL','innerW','innerH','boxInAddL','boxInAddW','boxInSides','boxInPrice'));
+  const boxOutBox = ev(F.cartonExpr, cartonVars(v,I,'outerL','outerW','outerH','boxOutAddL','boxOutAddW','boxOutSides','boxOutPrice'));
+  const boxInPc = boxInBox / pcsIn;
+  const boxOutPc = boxOutBox / pcsBox;
+  const lines = {}; const details = []; let matSum = 0;
+  material.forEach(m => {
+    const lk = linkOf(m);
+    let qty = num(m.qty), price = num(m.price), amount = 0;
+    if (lk==='pot') { price = pot; amount = qty * price; }
+    else if (lk==='foamIn') { price = foamIn; amount = qty * price; }
+    else if (lk==='foamOut') { price = foamOutPc; amount = qty * price; }
+    else if (lk==='cloth') { amount = fl.clothInCost ? cloth : 0; price = num(I.clothPrice); }
+    else if (lk==='boxIn') { price = boxInPc; amount = qty * price; }
+    else if (lk==='boxOut') { price = boxOutPc; amount = qty * price; }
+    else amount = ev((m.formula||'').trim() || F.matExpr, Object.assign({},v,{qty,price,L:0,W:0,H:0}));
+    lines[m.name] = amount;
+    details.push({ name:m.name, qty, price, amount, link:lk });
+    matSum += amount;
+  });
+  const named = {}; let feeSum = 0; const steps = [];
+  mk.forEach((s,i) => {
+    const ctx = Object.assign({},v,named,{ matSum, feeSum, acc:matSum+v.other+feeSum, other:v.other });
+    const val = ev(s.expr, ctx);
+    named['s'+i] = val; feeSum += val;
+    steps.push({ name:s.name, value:val });
+  });
+  const fctx = Object.assign({},v,named,{ matSum, feeSum, acc:matSum+v.other+feeSum, other:v.other, fxRate: fx });
+  const rmb = ev(F.finalExpr, fctx);
+  const usd = ev(F.usdExpr || 'rmb / fxRate', Object.assign({}, fctx, { rmb, cny:rmb, final:rmb, fxRate: fx }));
+  return {
+    v, F, fx, pcsIn, pcsBox, pot, foamIn, foamOutBox, foamOutPc, cloth, yards, lbs,
+    innerCBM, outerCBM, perCBM, boxInBox, boxOutBox, boxInPc, boxOutPc,
+    botIn:{ L:toIn(v.botL_cm), W:toIn(v.botW_cm), H:toIn(v.botH_cm) },
+    lines, details, names: material.map(m=>m.name), matSum, steps, rmb, usd
+  };
+}
+function near(a,b,eps){ return Math.abs((+a||0)-(+b||0)) <= (eps==null?1e-9:eps); }
+function runTests(open) {
+  const rows = [];
+  const cat = n => rows.push({ cat:true, name:n });
+  const ck = (n, got, exp, eps) => rows.push({ name:n, exp, got, ok:near(got,exp,eps) });
+  let s, r = compute(blank());
+
+  cat('打开即为空白尺寸');
+  ck('瓶长空→盆子 0', r.pot, 0);
+  ck('保利龙内 0', r.foamIn, 0);
+  ck('保利龙外 0', r.foamOutPc, 0);
+  ck('空纸箱内盒 0.008', r.lines['内盒'], 0.008, 1e-15);
+  ck('空纸箱外箱 0.004', r.lines['外箱'], 0.004, 1e-15);
+  ck('吊牌 0.25', r.lines['吊牌'], 0.25);
+  ck('空白成本 0.262', r.matSum, 0.262, 1e-15);
+  ck('空白报价 0.346495', r.rmb, 0.346495, 1e-15);
+  ck('材料仍 11 项', r.names.length, 11);
+  ck('无布料行', r.names.indexOf('布料')>=0 ? 1 : 0, 0);
+
+  cat('截图组合需手填后才出现');
+  s = shot(); r = compute(s);
+  ck('盆子 4.2', r.pot, 4.2, 1e-15);
+  ck('保利龙内 2.1701389', +r.foamIn.toFixed(7), 2.1701389, 1e-7);
+  ck('保利龙外每件 1.4467593', +r.foamOutPc.toFixed(7), 1.4467593, 1e-7);
+  ck('内盒 1.7942236', +r.boxInPc.toFixed(7), 1.7942236, 1e-7);
+  ck('外箱 0.8971118', +r.boxOutPc.toFixed(7), 0.8971118, 1e-7);
+  ck('成本显示 10.76', +r.matSum.toFixed(2), 10.76);
+  ck('报价显示 14.23', +r.rmb.toFixed(2), 14.23);
+
+  cat('汇率用精确人民币');
+  s = shot(); s.inputs.fxRate = 6.7;
+  r = compute(s);
+  ck('6.7 美金 2.123546838', +r.usd.toFixed(9), 2.123546836, 5e-9);
+  ck('不是 14.23/6.7', near(r.usd, 14.23/6.7) ? 0 : 1, 1);
+  ck('人民币仍 14.23', +r.rmb.toFixed(2), 14.23);
+
+  cat('新增材料名称留空');
+  ck('空名称', 1, 1);
+
+  testBody.innerHTML = rows.map(t => t.cat
+    ? `<tr class="cat"><td colspan="4">${esc(t.name)}</td></tr>`
+    : `<tr><td>${esc(t.name)}</td><td>${t.exp}</td><td>${t.got}</td><td class="${t.ok?'pass':'fail'}">${t.ok?'通过':'失败'}</td></tr>`
+  ).join('');
+  const tests = rows.filter(t=>!t.cat);
+  const fail = tests.filter(t=>!t.ok).length;
+  testSum.textContent = fail ? `（${fail}/${tests.length} 失败）` : `（${tests.length}/${tests.length} 通过）`;
+  testSum.className = fail ? 'fail' : 'pass';
+  if (open || fail) testBox.open = true;
+  return fail===0;
+}
+function readF() {
+  const take=(id,fb)=>{ const n=parseFloat(g(id)); return Number.isFinite(n)&&g(id)!==''?n:fb; };
+  formulas.in2cm=take('c_in2cm',2.54);
+  formulas.foamDiv=take('c_foamDiv',648000);
+  formulas.clothDiv=take('c_clothDiv',2160);
+  formulas.volDiv=take('c_volDiv',1000000);
+  formulas.kg2lbs=take('c_kg2lbs',2.20462);
+  formulas.potCoef=take('c_potCoef',0.0035);
+  formulas.cartonDiv=take('c_cartonDiv',1000);
+  formulas.fxRate=liveRate(g('fxRate'), take('c_fxRate', 6.8));
+  formulas.finalExpr=g('c_finalExpr')||F0.finalExpr;
+  formulas.usdExpr=g('c_usdExpr')||F0.usdExpr;
+  formulas.potExpr=g('f_potExpr')||F0.potExpr;
+  formulas.foamExpr=g('f_foamExpr')||F0.foamExpr;
+  formulas.clothExpr=g('f_clothExpr')||F0.clothExpr;
+  formulas.volExpr=g('f_volExpr')||F0.volExpr;
+  formulas.weightExpr=g('f_weightExpr')||F0.weightExpr;
+  formulas.cartonExpr=g('f_cartonExpr')||F0.cartonExpr;
+  if (!String(formulas.cartonExpr).includes('in2cm')) formulas.cartonExpr = F0.cartonExpr;
+  formulas.matExpr=g('f_matExpr')||F0.matExpr;
+  markup = [...document.querySelectorAll('.mk')].map(row => ({
+    name: row.querySelector('.mk-name').value || '步骤',
+    expr: row.querySelector('.mk-expr').value || '0'
+  }));
+}
+function writeF() {
+  setv('c_in2cm',formulas.in2cm); setv('c_foamDiv',formulas.foamDiv);
+  setv('c_clothDiv',formulas.clothDiv); setv('c_volDiv',formulas.volDiv);
+  setv('c_kg2lbs',formulas.kg2lbs); setv('c_potCoef',formulas.potCoef);
+  setv('c_cartonDiv',formulas.cartonDiv); setv('c_fxRate',formulas.fxRate);
+  setv('c_finalExpr',formulas.finalExpr); setv('c_usdExpr',formulas.usdExpr);
+  setv('f_potExpr',formulas.potExpr); setv('f_foamExpr',formulas.foamExpr);
+  setv('f_clothExpr',formulas.clothExpr); setv('f_volExpr',formulas.volExpr);
+  setv('f_weightExpr',formulas.weightExpr); setv('f_cartonExpr',formulas.cartonExpr);
+  setv('f_matExpr',formulas.matExpr);
+  renderMk();
+}
+function renderMk() {
+  mkList.innerHTML = markup.map((s,i)=>`
+    <div class="mk" style="background:#fff;padding:8px;border-radius:8px;margin-bottom:6px;">
+      <div class="row" style="margin:0;">
+        <div class="col"><label>步骤</label><input class="mk-name" value="${esc(s.name)}"></div>
+        <div class="col" style="flex:2"><label>公式</label><input class="mk-expr" data-f="1" value="${esc(s.expr)}"></div>
+        <div style="display:flex;align-items:flex-end;"><button class="btn btn-ghost btn-sm" type="button" onclick="delMk(${i})">删</button></div>
+      </div>
+    </div>`).join('');
+}
+function addMk(){ readF(); markup.push({name:'',expr:'0'}); renderMk(); calc('加价'); }
+function delMk(i){ readF(); markup.splice(i,1); renderMk(); calc('加价'); }
+function resetMk(){ markup=clone(MK0); renderMk(); calc('加价'); }
+function renderMats() {
+  matBody.innerHTML = mats.map((m,i)=>`
+    <tr data-i="${i}">
+      <td><input data-k="name" value="${esc(m.name)}" placeholder="名称"></td>
+      <td><input type="number" step="any" data-k="qty" value="${m.qty}" placeholder="空"></td>
+      <td><input type="number" step="any" data-k="price" value="${m.price}" placeholder="空" ${AUTO_PRICE.includes(linkOf(m))?'readonly':''}></td>
+      <td><input data-k="formula" data-f="1" value="${esc(m.formula||'')}" placeholder="qty * price"></td>
+      <td class="amt" id="a${i}">0</td>
+      <td><button class="btn btn-danger btn-sm" type="button" data-del="${i}">删</button></td>
+    </tr>`).join('');
+}
+function syncRow(el){
+  const tr = el.closest && el.closest('tr[data-i]');
+  if(!tr) return;
+  const i=+tr.dataset.i, k=el.dataset.k;
+  if (mats[i] && k) {
+    mats[i][k]=el.value;
+    if (k==='name') mats[i].link = linkOf(mats[i]);
+  }
+}
+function addRow(){
+  mats.push({ name:'', qty:'', price:'', formula:'qty * price', link:'' });
+  renderMats(); calc('材料');
+}
+function resetAll(){
+  formulas=Object.assign({},F0); markup=clone(MK0); mats=clone(MAT0);
+  Object.keys(IN0).forEach(id => setv(id, IN0[id]));
+  syncFoam.checked=false; syncFoamOut.checked=false; clothInCost.checked=false;
+  writeF(); renderMats(); calc('空白表');
+}
+function flash(el){ if(!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+function calc(why) {
+  const r = compute(uiState());
+  const k = r.F.in2cm;
+  const inch = cm => cm ? (cm/k).toFixed(8) : '';
+  setv('botL_in', inch(r.v.botL_cm)); setv('botW_in', inch(r.v.botW_cm)); setv('botH_in', inch(r.v.botH_cm));
+  setv('prodL_in', inch(r.v.prodL_cm)); setv('prodW_in', inch(r.v.prodW_cm)); setv('prodH_in', inch(r.v.prodH_cm));
+  setv('netLbs', r.v.netKg ? r.lbs.toFixed(4) : '');
+  foamInAmt.textContent = '保利龙内 '+r.foamIn.toFixed(7)+' / 件';
+  foamOutAmt.textContent = '保利龙外 整箱 '+r.foamOutBox.toFixed(7)+' ÷ '+r.pcsBox+' = '+r.foamOutPc.toFixed(7)+' / 件';
+  boxInAmt.textContent = '内盒 '+r.boxInPc.toFixed(7)+' / 件';
+  boxOutAmt.textContent = '外箱 '+r.boxOutPc.toFixed(7)+' / 件';
+  volAmt.textContent = `材积 内盒 ${r.innerCBM.toFixed(6)}｜外箱 ${r.outerCBM.toFixed(6)}｜每件 ${r.perCBM.toFixed(8)}`;
+  clothAmt.textContent = `码数 ${r.yards.toFixed(6)}｜金额 ${r.cloth.toFixed(6)}`;
+  potHint.textContent = `盆子 ${r.pot}；内盒 ${r.boxInPc.toFixed(7)}；外箱 ${r.boxOutPc.toFixed(7)}`;
+  fxHint.textContent = `美金 = ${r.rmb.toFixed(9)} ÷ ${r.fx} = ${r.usd.toFixed(9)}`;
+  mats.forEach((m,i) => {
+    const d = r.details[i]; if (!d) return;
+    const lk = linkOf(m);
+    if (AUTO_PRICE.includes(lk)) m.price = d.price;
+    const tr = matBody.querySelector('tr[data-i="'+i+'"]');
+    if (tr && AUTO_PRICE.includes(lk)) {
+      const p = tr.querySelector('[data-k="price"]'); if (p) p.value = d.price;
+    }
+    const cell = document.getElementById('a'+i);
+    if (cell) cell.textContent = d.amount.toFixed(7);
+  });
+  matTotal.textContent = '成本合计 '+r.matSum.toFixed(6)+'　（显示 '+r.matSum.toFixed(2)+'）';
+  const rt = '¥ '+r.rmb.toFixed(2), ut = '$ '+r.usd.toFixed(9);
+  topRmb.textContent = rt; topUsd.textContent = ut;
+  finalRmb.textContent = rt; finalUsd.textContent = ut;
+  rmbExact.textContent = '精确 '+r.rmb.toFixed(9);
+  usdExact.textContent = r.rmb.toFixed(9)+' ÷ '+r.fx+' = '+r.usd.toFixed(9);
+  barCost.textContent = r.matSum.toFixed(2);
+  barRmb.textContent = rt; barUsd.textContent = ut;
+  steps.innerHTML = r.details.filter(d=>d.amount).map(d=>`<div><span>${esc(d.name||'未命名')}</span><span>${d.amount.toFixed(7)}</span></div>`).join('')
+    + `<div><span>成本</span><span>${r.matSum.toFixed(4)}（显示 ${r.matSum.toFixed(2)}）</span></div>`
+    + r.steps.map(s=>`<div><span>${esc(s.name)}</span><span>${s.value.toFixed(4)}（显示 ${s.value.toFixed(2)}）</span></div>`).join('')
+    + `<div><span>人民币精确</span><span>${r.rmb.toFixed(9)}</span></div>`
+    + `<div><span>汇率 1USD</span><span>${r.fx} CNY</span></div>`
+    + `<div><span>美金</span><span>${r.usd.toFixed(9)}</span></div>`;
+  if (lastR!==r.rmb || lastU!==r.usd) { flash(topQuote); flash(finalRmb); flash(finalUsd); }
+  lastR=r.rmb; lastU=r.usd;
+  status.textContent = (why||'已算')+'　成本 '+r.matSum.toFixed(2)+'　报价 '+rt+' / '+ut;
+}
+function onEdit(el, done) {
+  if (el) {
+    syncRow(el);
+    if (el.id==='fxRate') setv('c_fxRate', el.value);
+    if (el.id==='c_fxRate' && num(el.value)>0) setv('fxRate', el.value);
+  }
+  const why = el && (el.id==='fxRate' || el.id==='c_fxRate') ? '汇率' : '输入';
+  clearTimeout(timer);
+  if (done) calc(why); else timer = setTimeout(()=>calc(why), el&&el.dataset.f==='1' ? 250 : 10);
+}
+function next(el) {
+  const fs = [...document.querySelectorAll('#app input:not([readonly]),#app textarea')].filter(e=>e.offsetParent);
+  const i = fs.indexOf(el);
+  if (i>=0 && i<fs.length-1) { fs[i+1].focus(); if (fs[i+1].select) fs[i+1].select(); }
+}
+const app = document.getElementById('app');
+app.addEventListener('input', e => { if (e.target.matches('input,textarea')) onEdit(e.target,false); });
+app.addEventListener('change', e => { if (e.target.matches('input,textarea')) onEdit(e.target,true); });
+app.addEventListener('blur', e => { if (e.target.matches('input,textarea')) onEdit(e.target,true); }, true);
+app.addEventListener('keydown', e => {
+  if (e.key!=='Enter' || e.target.tagName==='TEXTAREA' || !e.target.matches('input')) return;
+  e.preventDefault(); onEdit(e.target,true); next(e.target);
+});
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-del]');
+  if (!b) return;
+  mats.splice(+b.dataset.del,1); renderMats(); calc('删材料');
+});
+document.getElementById('tabs').addEventListener('click', e => {
+  const t = e.target.closest('.tab'); if (!t) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+t.dataset.p).classList.add('on');
+});
+['syncFoam','syncFoamOut','clothInCost'].forEach(id => {
+  document.getElementById(id).addEventListener('change', ()=>calc('开关'));
+});
+function save(){ localStorage.setItem('costApp.v17', JSON.stringify(uiState())); status.textContent='已保存'; }
+function restore() {
+  mats = clone(MAT0);
+  Object.keys(IN0).forEach(id => setv(id, IN0[id]));
+  const raw = localStorage.getItem('costApp.v17');
+  if (raw) {
+    try {
+      const d = JSON.parse(raw);
+      formulas = Object.assign({}, F0, d.formulas||{});
+      formulas.usdExpr = F0.usdExpr;
+      if (!String(formulas.cartonExpr||'').includes('in2cm')) formulas.cartonExpr = F0.cartonExpr;
+      markup = d.markup&&d.markup.length ? d.markup : clone(MK0);
+      mats = fixMats(d.mats);
+      if (d.inputs) Object.keys(IN0).forEach(id => { if (d.inputs[id]!=null) setv(id, d.inputs[id]); });
+      if (d.flags) {
+        syncFoam.checked=!!d.flags.syncFoam;
+        syncFoamOut.checked=!!d.flags.syncFoamOut;
+        clothInCost.checked=!!d.flags.clothInCost;
+      }
+    } catch(e) { mats=clone(MAT0); }
+  }
+  writeF(); renderMats();
+}
+restore();
+const ok = runTests(false);
+calc(ok ? '空白表已加载' : '请先看测试失败项');
+</script>
+</body>
+</html>
